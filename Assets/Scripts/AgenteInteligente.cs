@@ -6,6 +6,7 @@ using UnityEngine;
 public class AgenteInteligente : MonoBehaviour
 {
     private enum Estados { PARED, E_IZQ, ES_IZQ, E_DER, ES_DER, PS_IZQ, PS_DER, S_PASILLO, LIBRE };
+    private enum Modo { AUTOMATICO, INFINITO }
     private Dictionary<Estados, List<int>> background = new Dictionary<Estados, List<int>>();
 
     [SerializeField]
@@ -21,7 +22,7 @@ public class AgenteInteligente : MonoBehaviour
     [SerializeField]
     private int cantidadPasos;
     [SerializeField]
-    private bool automatic;
+    private Modo modo;
 
     [SerializeField]
     private float velocidad = 0.3f;
@@ -55,8 +56,26 @@ public class AgenteInteligente : MonoBehaviour
         position = transform.position;
         colliders = transform.GetChild(2).transform.GetComponentsInChildren<Colliders>();
 
-        if (automatic)
+        if (modo == Modo.AUTOMATICO)
             StartCoroutine(AutomaticMove());
+        else if (modo == Modo.INFINITO)
+            StartCoroutine(Infinito());
+    }
+
+    IEnumerator Infinito()
+    {
+        int i=0;
+        while(true)
+        {
+            Rotar();
+            if (i > 0)
+                Move();
+            
+            if(i==0)
+                i++;
+
+            yield return new WaitForSeconds(velocidad);
+        }
     }
 
     IEnumerator AutomaticMove()
